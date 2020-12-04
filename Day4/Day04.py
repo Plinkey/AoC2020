@@ -1,11 +1,15 @@
-# with open('Day04.input', 'r') as f:
-#     data = f.read().splitlines()
+with open('Day04.input', 'r') as f:
+    data = f.read().splitlines()
 
+#---------
+# Examples
+#---------
 # with open('Day04.example', 'r') as f:
 #     data = f.read().splitlines()
-
-with open('Day04pt2_invalid.example', 'r') as f:
-    data = f.read().splitlines()
+# with open('Day04pt2_invalid.example', 'r') as f:
+#     data = f.read().splitlines()
+# with open('Day04pt2_valid.example', 'r') as f:
+#     data = f.read().splitlines()
 
 """
 byr : birth year
@@ -17,14 +21,17 @@ ecl : eye color
 pid : passport ID
 cid : country ID
 
-Everything but CID is required"""
-
-validTags = ['byr','iyr','eyr','hgt','hcl','ecl','pid']
-
+Everything but CID is required
 # blank lines starts new entry
 # if line == '': starts new entry
 
+"""
+
+validTags = ['byr','iyr','eyr','hgt','hcl','ecl','pid']
+
+
 passportData = {}
+
 
 # Parse Data
 count = 1
@@ -40,12 +47,14 @@ for line in data:
         passportData[count][tag] = value
         
 
+# Part 1 Validation
 def validate(passport):
     if all(elem in passport.keys() for elem in validTags): # if validTags are present
         return True
     else:
         return False
     
+# Count part 1 valid passports
 validcount = 0
 for p in passportData:
     if validate(passportData[p]):
@@ -59,15 +68,19 @@ print(validcount)
 #--------
 
 
-
+# Part 2 validation
 def validate2(passport):
+    if not validate(passport):
+        return False
     byr = passport['byr']
     iyr = passport['iyr']
     eyr = passport['eyr']
 
     hgt = passport['hgt']
-    num = int(hgt[0:3])
-    unit = hgt[3:]
+    try: num = int(hgt[:-2])
+    except: return False
+    unit = hgt[-2:]
+    # unit = hgt[3:]
 
     hcl = passport['hcl']
     ecl = passport['ecl']
@@ -85,15 +98,19 @@ def validate2(passport):
 
     elif unit not in ['in','cm']:
         return False
-    elif unit.lower() == 'in':
-        if not(59<= num <= 76):
-            return False
-    elif unit.lower() == 'cm':
-        if not(150<= num <= 193):
-            return False
+    elif unit.lower() == 'in' and not(59<= num <= 76):
+        return False
+    # elif unit.lower() == 'in':
+    #     if not(59<= num <= 76):
+    #         return False
+    elif unit.lower() == 'cm' and not(150<= num <= 193):
+        return False
+    # elif unit.lower() == 'cm':
+    #     if not(150<= num <= 193):
+    #         return False
+    
 
     elif hcl[0] != '#' or len(hcl) != 7:
-        print('False')
         return False
 
     elif ecl not in ['amb','blu','brn','gry','grn','hzl','oth']:
@@ -105,23 +122,10 @@ def validate2(passport):
     else:
         return True
 
+pCount = 0
+for p in passportData:
+    if validate2(passportData[p]):
+        pCount += 1
 
-"""
-byr valid:   2002
-byr invalid: 2003
+print(pCount)
 
-hgt valid:   60in
-hgt valid:   190cm
-hgt invalid: 190in
-hgt invalid: 190
-
-hcl valid:   #123abc
-hcl invalid: #123abz
-hcl invalid: 123abc
-
-ecl valid:   brn
-ecl invalid: wat
-
-pid valid:   000000001
-pid invalid: 0123456789
-"""
