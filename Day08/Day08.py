@@ -9,12 +9,6 @@ else:
     with open('Day08.input', 'r') as f:
         data = f.read().splitlines()
         
-# %% 
-# Initialize stuff
-seenLines = []
-accumulator = 0
-
-curLine = 0
 
 
 # %%
@@ -31,15 +25,14 @@ def acc(lineNo):
     seenLines.append(lineNo)
     global accumulator
     accumulator += num
-    print('On Line: {}, the accumulator is {}'.format(lineNo, accumulator))
+    if debug:
+        print('On Line: {}, the accumulator is {}'.format(lineNo, accumulator))
     return lineNo+1
 
 # %%
 # NOP command
 def nop(lineNo):
     command, num = process(lineNo)
-    if command != 'nop':
-        print('STUPID! This is not the acc command. Line {}'.format(lineNo))
     seenLines.append(lineNo)
     return lineNo+1
 
@@ -51,9 +44,8 @@ def jmp(lineNo):
     return lineNo + num
 
 # %%
-def runLine(lineNo):
+def runLine(lineNo, data=data):
     if 'nop' in data[lineNo]:
-        print('nop lineNo: {}'.format(lineNo))
         nextLine = nop(lineNo)
     elif 'jmp' in data[lineNo]:
         nextLine = jmp(lineNo)
@@ -61,26 +53,36 @@ def runLine(lineNo):
         nextLine = acc(lineNo)
     return nextLine
 
-while True:
-    if curLine in seenLines:
-        print('The answer to part one is: {}'.format(accumulator))
-        break
-    curLine = runLine(curLine)
+
     
-"""# %%
+def runIt(data):
+    global seenLines
+    seenLines = []
+    global accumulator
+    accumulator = 0
+    curLine = 0
+    while True:
+        if curLine in seenLines:
+            print('The answer to part one is: {}'.format(accumulator))
+            break
+        curLine = runLine(curLine)
+
+runIt(data)
+            
+    
+# %%
 # Part Two
 
 
 #%%
-def resetData():
-    global debug
-    if debug:
-        with open('Day08.example', 'r') as f:
-            data = f.read().splitlines()
-    else:    
-        with open('Day08.input', 'r') as f:
-            data = f.read().splitlines()
-    return data
+# def resetData():
+#     if debug:
+#         with open('Day08.example', 'r') as f:
+#             data = f.read().splitlines()
+#     else:    
+#         with open('Day08.input', 'r') as f:
+#             data = f.read().splitlines()
+#     return data
 
 def changeThisLine(lineNo):
     cmd, num = process(lineNo)
@@ -91,31 +93,66 @@ def changeThisLine(lineNo):
     return '{} {}'.format(new, num)
 
 # %%
-def part2Trial(changeLine):
-    curLine = 0
+# def part2Trial(changeLine):    
+#     flag = True
+#     while True:
+#         print(seenLines)
+#         if curLine in seenLines:
+#             print('Infinite Loop. changeLine: {}'.format(changeLine))
+#             return flag
+#         elif curLine == len(data):
+#             print('The answer to part two is: {}'.format(accumulator))
+#             flag = False
+#             return flag
+#         print('the current line(error): {}'.format(curLine))
+#         curLine = runLine(curLine)
+
+def part2Trial(indata):
     global seenLines
-    global data
     seenLines = []
-    print('line was: {}'.format(data[changeLine]))
-    data[changeLine] = changeThisLine(changeLine)
-    print('line is now: {}'.format(data[changeLine]))
-    
-    flag = True
+    global accumulator
+    accumulator = 0
+    curLine = 0
+    flag = False
+    # print('#### STARTING NEW TRIAL###')
     while True:
         print(seenLines)
         if curLine in seenLines:
-            print('Infinite Loop. changeLine: {}'.format(changeLine))
+            # flag = True
+            # print('### Ending trial due to curline in seen lines')
+            print('curline: {}, seenlines: {}'.format(curLine, seenLines))
             return flag
-        elif curLine == len(data):
+        elif curLine == len(indata):
             print('The answer to part two is: {}'.format(accumulator))
-            flag = False
+            flag = True
             return flag
-        print('the current line(error): {}'.format(curLine))
-        curLine = runLine(curLine)
+        print(indata[curLine])
+        curLine = runLine(curLine, data = indata)
+        # print('new curLine: {}'.format(curLine))
         
 
+def part2RunIt():
+    changeLine = 0
+    while True:
+        d = data.copy()
+        if 'jmp' in d[changeLine] or 'nop' in d[changeLine]:
+            # print('changing line {}'.format(changeLine))
+            d[changeLine] = changeThisLine(changeLine)
+            if d[changeLine] == 'jmp 0':
+                changeLine += 1
+                continue
+            # print(d)
+            flag = part2Trial(d)
+            if flag:
+                break
+            changeLine += 1
+        else:
+            changeLine += 1
+            
+            
+part2RunIt()
 
-
+"""
 changeLine = 0
 while True:
     print('The changeLine is now: {}'.format(changeLine))
